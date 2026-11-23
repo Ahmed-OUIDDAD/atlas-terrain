@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Atlas Terrain</title>
+  <meta name="description" content="Application des commerciaux d'Atlas Distribution : catalogue, devis et visites. Projet pédagogique, données fictives.">
+  <meta name="theme-color" content="#0F4C5C">
+
+  <!-- Application installable (PWA) -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+
+  <!-- iPhone -->
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Atlas">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <span class="brand-name">Atlas <strong>Terrain</strong></span>
+    </div>
+    <div class="topbar-actions">
+      <span id="offline-pill" class="pill pill-offline" hidden>Hors ligne</span>
+      <button id="install-btn" class="btn btn-small btn-accent" type="button" hidden>Installer l'appli</button>
+    </div>
+  </header>
+
+  <div id="ios-tip" class="ios-tip" hidden>
+    <p>Pour installer l'appli sur iPhone : touchez <strong>Partager</strong> puis <strong>Sur l'écran d'accueil</strong>.</p>
+    <button id="ios-tip-close" class="icon-btn" type="button" aria-label="Fermer le conseil">×</button>
+  </div>
+
+  <main id="main">
+    <!-- ================= CATALOGUE ================= -->
+    <section id="tab-catalogue" class="panel" role="tabpanel" aria-labelledby="nav-catalogue">
+      <h1 class="panel-title">Catalogue</h1>
+      <label class="search">
+        <span class="visually-hidden">Rechercher un produit</span>
+        <input id="search" type="search" placeholder="Rechercher un produit ou une référence" autocomplete="off">
+      </label>
+      <p id="catalogue-count" class="muted small"></p>
+      <ul id="catalogue-list" class="cards"></ul>
+      <p class="muted small notice">Projet pédagogique — produits et prix fictifs.</p>
+    </section>
+
+    <!-- ================= DEVIS ================= -->
+    <section id="tab-devis" class="panel" role="tabpanel" aria-labelledby="nav-devis" hidden>
+      <div class="panel-head">
+        <h1 class="panel-title">Devis</h1>
+        <span id="devis-number" class="tag"></span>
+      </div>
+
+      <label class="field">
+        <span>Client (facultatif)</span>
+        <input id="devis-client" type="text" placeholder="Ex. : Librairie Al Amal (fictif)" autocomplete="off">
+      </label>
+
+      <div class="add-line">
+        <label class="field grow">
+          <span>Produit</span>
+          <select id="add-product"></select>
+        </label>
+        <button id="add-line-btn" class="btn" type="button">Ajouter</button>
+      </div>
+
+      <ul id="devis-lines" class="lines"></ul>
+      <p id="devis-empty" class="muted empty">Aucun produit. Ajoutez-en depuis le catalogue ou la liste ci-dessus.</p>
+
+      <label class="field">
+        <span>Remise (%) — de 0 à <span id="remise-max"></span> %</span>
+        <input id="devis-remise" type="text" inputmode="decimal" placeholder="0">
+      </label>
+
+      <div id="devis-errors" class="errors" role="alert" aria-live="polite"></div>
+
+      <dl id="devis-totals" class="totals">
+        <div><dt>Total HT brut</dt><dd id="t-brut">—</dd></div>
+        <div><dt>Remise</dt><dd id="t-remise">—</dd></div>
+        <div><dt>Total HT</dt><dd id="t-ht">—</dd></div>
+        <div><dt>TVA 20 %</dt><dd id="t-tva">—</dd></div>
+        <div class="grand"><dt>Total TTC</dt><dd id="t-ttc">—</dd></div>
+      </dl>
+
+      <div class="actions">
+        <a id="whatsapp-btn" class="btn btn-accent" href="#" target="_blank" rel="noopener">Envoyer par WhatsApp</a>
+        <button id="copy-btn" class="btn btn-ghost" type="button">Copier le devis</button>
+        <button id="new-devis-btn" class="btn btn-ghost" type="button">Nouveau devis</button>
+      </div>
+      <p class="muted small notice">Devis indicatif — projet pédagogique.</p>
+    </section>
+
+    <!-- ================= VISITES ================= -->
+    <section id="tab-visites" class="panel" role="tabpanel" aria-labelledby="nav-visites" hidden>
+      <h1 class="panel-title">Visites</h1>
+      <form id="visite-form" class="form" novalidate>
+        <label class="field">
+          <span>Client</span>
+          <input id="v-client" name="client" type="text" required autocomplete="off" placeholder="Nom du client (fictif)">
+        </label>
+        <label class="field">
+          <span>Date</span>
+          <input id="v-date" name="date" type="date" required>
+        </label>
+        <label class="field">
+          <span>Compte rendu</span>
+          <textarea id="v-notes" name="notes" rows="4" required placeholder="Ce qui a été dit, ce qui est à faire…"></textarea>
+        </label>
+        <div id="visite-errors" class="errors" role="alert" aria-live="polite"></div>
+        <button class="btn btn-primary btn-block" type="submit">Enregistrer la visite</button>
+      </form>
+
+      <div class="list-head">
+        <h2 id="visites-count" class="h2">0 visite</h2>
+        <button id="export-btn" class="btn btn-small btn-ghost" type="button" disabled>Exporter en CSV</button>
+      </div>
+      <ul id="visites-list" class="cards"></ul>
+      <p class="muted small notice">Les visites sont enregistrées uniquement dans ce téléphone.</p>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <nav class="tabbar" role="tablist" aria-label="Navigation principale">
+    <button id="nav-catalogue" class="tab" role="tab" aria-selected="true" aria-controls="tab-catalogue" data-tab="catalogue" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h16" /></svg>
+      <span>Catalogue</span>
+    </button>
+    <button id="nav-devis" class="tab" role="tab" aria-selected="false" aria-controls="tab-devis" data-tab="devis" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5" /></svg>
+      <span>Devis <b id="devis-badge" class="badge" hidden></b></span>
+    </button>
+    <button id="nav-visites" class="tab" role="tab" aria-selected="false" aria-controls="tab-visites" data-tab="visites" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" /></svg>
+      <span>Visites</span>
+    </button>
+  </nav>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
